@@ -1,0 +1,58 @@
+name: bill_manager
+description: "App para gestão de contas"
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  get: ^4.7.3
+  sqflite: ^2.4.2+1
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  shared_preferences: ^2.5.5
+  flutter_slidable: ^4.0.3
+  camera_camera: ^3.0.0
+  csv: ^6.0.0
+  share_plus: ^13.1.0
+  package_info_plus: ^10.1.0
+  image_picker: ^1.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+  flutter_launcher_icons: "^0.13.1"
+  flutter_native_splash: ^2.4.7
+
+flutter_launcher_icons:
+  image_path: "assets/icon/ic_launcher_base.png" # O teu ícone principal (1024x1024 px)
+  android: true
+  ios: false
+
+flutter_native_splash:
+  color: "#d7d9e7" # Cor de fundo da sua splash
+  image: assets/splash.png # Caminho da sua imagem/logo
+  fullscreen: true
+
+android_12:
+  image: assets/splash.png
+  color: "#d7d9e7"
+
+flutter:
+
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/icon/ic_launcher_base.png
+    - assets/icon/icone.png
