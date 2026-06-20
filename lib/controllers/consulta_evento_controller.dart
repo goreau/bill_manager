@@ -1,5 +1,4 @@
 import 'package:bill_manager/controllers/navigation_controller.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -68,7 +67,7 @@ class ConsultaEventoController extends GetxController {
         await txn.delete(
             'rateio',
             where: 'id_despesa = ?',
-            whereArgs: [row['id_despesa']]git add
+            whereArgs: [row['id_despesa']]
         );
       }
 
@@ -96,8 +95,8 @@ class ConsultaEventoController extends GetxController {
   }
 
   void checaBanco() async {
-    List<Map<String, dynamic>> dados;
-    final db = DbHelper.instance;
+   // List<Map<String, dynamic>> dados;
+   // final db = DbHelper.instance;
 
    /* db.limpa('rateio');
     db.limpa('despesa');

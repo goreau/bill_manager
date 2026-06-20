@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class EventoModel {
   final int id;
   final String nome;
@@ -14,6 +12,7 @@ class EventoModel {
       participantes: participantes,
     );
   }
+
 
   EventoModel({
     required this.id,

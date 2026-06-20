@@ -1,3 +1,5 @@
+import 'auxiliares.dart';
+
 class Evento {
   late int idEvento;
   late String nome;
@@ -26,22 +28,8 @@ class LstMaster {
   }
 }
 
-/*class LstDetail {
-  int id;
-  int status;
-  String ordem;
-  String endereco;
-
-  LstDetail(this.id, this.status, this.ordem, this.endereco);
-
-  factory LstDetail.fromJson(dynamic json) {
-    //var prop = jsonDecode(json['dados_proposta']);
-    return LstDetail(
-        int.parse(json['id_visita'].toString()),
-        int.parse(json['status'].toString()),
-        json['ordem'].toString(),
-        json['endereco'].toString().trim() +
-            ', ' +
-            json['numero'].toString().trim());
-  }
-}*/
+abstract class EventoRepository {
+  Future<List<EventoModel>> fetchAll();
+  Future<void> save(EventoModel evento);
+  Future<void> delete(int id);
+}
