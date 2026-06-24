@@ -147,7 +147,7 @@ class DbHelper {
   }
 
   Future<List<Evento>> consultaEventoMaster() async {
-    Database? db = await instance.database;
+  //  Database? db = await instance.database;
 
     // 1. Busca todos os eventos
   //  List<Map<String, dynamic>> eventosMap = await db!.query('evento');
