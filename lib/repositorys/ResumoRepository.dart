@@ -5,7 +5,7 @@ class ResumoRepository {
 
   ResumoRepository(this.dio);
 
-  @override
+
   Future<ResumoResponse> getResumo(int id) async {
     try {
       final response = await dio.get('/resumo/getResumo/$id');
@@ -18,7 +18,7 @@ class ResumoRepository {
     }
   }
 
-  @override
+
   Future<List<dynamic>> getDetalhes(int id) async {
     try {
       final response = await dio.get('/resumo/getDetalhes/$id');
@@ -31,7 +31,7 @@ class ResumoRepository {
     }
   }
 
-  @override
+
   Future<void> getExport(int id, String savePath) async {
     try {
       await dio.download('/resumo/getExport/$id',

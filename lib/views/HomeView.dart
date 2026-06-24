@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:bill_manager/controllers/consulta_evento_controller.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';

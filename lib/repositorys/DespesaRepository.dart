@@ -6,7 +6,7 @@ class DespesaRepository {
   final Dio dio;
   DespesaRepository(this.dio);
 
-  @override
+
   Future<void> save(Despesa despesa) async {
     final response;
 
@@ -18,12 +18,12 @@ class DespesaRepository {
     print(response);
   }
 
-  @override
+
   Future<void> delete(int id) async {
     await dio.delete('/despesa/deleteDespesa/$id');
   }
 
-  @override
+
   Future<List<Despesa>> fetchAll(int id) async {
     final response = await dio.get('/despesa/despesasEvento/$id');
     print(response.data);
@@ -36,7 +36,7 @@ class DespesaRepository {
     return data.map((json) => Despesa.fromJson(json)).toList();
   }
 
-  @override
+
   Future<List<dynamic>> getParticipantes(int id) async {
     final response = await dio.get('/despesa/getParticipantes/$id');
     //print(response.data);

@@ -5,7 +5,7 @@ class EventoRepository {
   final Dio dio;
   EventoRepository(this.dio);
 
-  @override
+
   Future<void> save(Evento evento) async {
     FormData formData = await criarFormData(evento);
     final response;
@@ -36,12 +36,10 @@ class EventoRepository {
     return FormData.fromMap(data);
   }
 
-  @override
   Future<void> delete(int id) async {
     await dio.delete('/evento/deleteEvento/$id');
   }
 
-  @override
   Future<List<Evento>> fetchAll() async {
     final response = await dio.get('/evento/eventosUser');
     //print(response.data);

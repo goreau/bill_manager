@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:bill_manager/components/appScaffold.dart';
 import 'package:bill_manager/controllers/evento_controller.dart';
 import 'package:camera_camera/camera_camera.dart';

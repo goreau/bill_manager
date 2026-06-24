@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:bill_manager/util/storage.dart';
-import 'package:csv/csv.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:path_provider/path_provider.dart';
@@ -50,14 +47,14 @@ class ResumoController extends GetxController {
     Map<String, double> saldos = {};
 
 // 1. Adiciona créditos (quem pagou)
-    for (var row in resultadosPagamentos!) {
+    for (var row in resultadosPagamentos) {
       String nome = row['nome'];
       double valor = double.parse(row['total']);
       saldos[nome] = (saldos[nome] ?? 0) + valor;
     }
 
 // 2. Subtrai débitos (quem deve)
-    for (var row in resultadosDevidos!) {
+    for (var row in resultadosDevidos) {
       String nome = row['nome'];
       double valor = double.parse(row['total']);
       saldos[nome] = (saldos[nome] ?? 0) - valor;
@@ -108,11 +105,7 @@ class ResumoController extends GetxController {
       await repository.getExport(eventoId!, path);
 
       // 3. Compartilha o arquivo baixado
-      await Share.shareXFiles(
-        [XFile(path)],
-        text: 'Segue o relatório exportado em CSV',
-        subject: 'Exportar CSV',
-      );
+      await SharePlus.instance.share( ShareParams( files: [XFile(path)], text: 'Segue a exportação em CSV', title: 'Exportar CSV', ), );
     } catch (e) {
       print("Erro ao exportar/compartilhar: $e");
       // Aqui você pode adicionar um Get.snackbar para avisar o usuário

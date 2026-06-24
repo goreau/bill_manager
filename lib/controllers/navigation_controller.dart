@@ -5,9 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path/path.dart';
-
-import 'despesa_controller.dart';
 
 class NavigationController extends GetxController {
   var tabIndex = 0.obs;

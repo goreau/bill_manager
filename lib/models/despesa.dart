@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class Despesa {
   int? idDespesa; // Usar int? ajuda a lidar com o caso de novos despesas (id = null)
   int id_evento;
@@ -37,7 +35,7 @@ class Despesa {
     );
   }
 
-  // Método para enviar para a API (o que o Node espera)
+
   Map<String, dynamic> toJson() {
     return {
       'id_despesa': idDespesa,

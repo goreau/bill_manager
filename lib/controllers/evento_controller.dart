@@ -60,7 +60,7 @@ class EventoController extends GetxController {
     );
 
     if (pickedFile != null) {
-      File imageFile = File(pickedFile.path);
+     // File imageFile = File(pickedFile.path);
       imagem.value = pickedFile.path;
     }
   }

@@ -1,12 +1,7 @@
 import 'package:bill_manager/controllers/bindings/evento_bindings.dart';
 import 'package:bill_manager/views/DetalheResumo.dart';
 import 'package:bill_manager/views/SearchView.dart';
-
-import '../controllers/bindings/login_bindings.dart';
 import '../controllers/camera_controller.dart';
-import '../controllers/despesa_controller.dart';
-import '../controllers/evento_controller.dart';
-import '../controllers/login_controller.dart';
 import '../views/CadastroView.dart';
 import '../views/LoginView.dart';
 import '../views/RegisterView.dart';

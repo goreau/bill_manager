@@ -1,6 +1,5 @@
 import 'package:bill_manager/util/storage.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 
@@ -41,7 +40,7 @@ class LoginRepository {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final message = response.data['message']; // Ajuste conforme o JSON do seu backend
-        final user = response.data['user'];
+      //  final user = response.data['user'];
         return message;
       }
       return 'Erro ao cadastrar o usuário';

@@ -25,7 +25,7 @@ class Evento {
     );
   }
 
-  // Método para enviar para a API (o que o Node espera)
+
   Map<String, dynamic> toJson() {
     return {
       'nome': nome,
