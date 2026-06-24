@@ -1,18 +1,33 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import '../models/despesa.dart';
+import '../repositorys/DespesaRepository.dart';
 import '../util/db_helper.dart';
 
 class DespesaController extends GetxController {
-  int? eventoId;
   int? editId;
+  int? eventoId;
 
-  final dbHelper = DbHelper.instance;
+  Despesa? despesaEmEdicao;
+
+  final DespesaRepository repository;
+  DespesaController(this.repository);
+
+  @override
+  void onInit() {
+    super.onInit();
+    preparar();
+  }
+
+  static const snackBarDuration = Duration(seconds: 2);
 
   var nomeEv = ''.obs;
-  final RxList<ItemEvento> listaParticipantes = <ItemEvento>[].obs;
+  final RxList<ItemRateio> listaParticipantes = <ItemRateio>[].obs;
   final lstPagador = <DropdownMenuItem<String>>[].obs;
 
   final valorController = TextEditingController();
@@ -25,25 +40,53 @@ class DespesaController extends GetxController {
 
   var loadingPagador = false.obs;
 
-  Future<void> manageEvento(int id, int edit) async {
-    editId = edit;
-    eventoId = id;
-
-    if ( editId! > 0 ){
-        await carregarDespesa();
-    } else {
-      limpaForm();
+  Future<void> preparar() async {
+    final dynamic args = Get.arguments;
+    if (args != null && args is Map) {
+      despesaEmEdicao = args['desp'] as Despesa?;
+      eventoId = args['evento'] as int;
     }
 
-    if (id > 0) {
-      await carregarEvento();
-      lstPagador.assignAll(await loadData('participante', 'id_evento = ' + id.toString()));
+
+    if (despesaEmEdicao == null) {
+      editId = 0;
+      doClear();
     } else {
-      //voltar para o início
+      editId = despesaEmEdicao?.idDespesa;
+      prepararTela(despesaEmEdicao!);
     }
+
+    criaLista();
+
   }
 
-  void limpaForm(){
+  Future<void> criaLista() async {
+    List<dynamic> lista = await repository.getParticipantes(eventoId!);
+
+    final idsNoRateio = despesaEmEdicao?.rateio?.map((r) => r.id_pagador).toList();
+
+    listaParticipantes.value = lista.map((item) {
+      return ItemRateio(
+        id: item['id_participante'].toString(),
+        nome: item['nome'],
+        isChecked: idsNoRateio!.contains(item['id_participante']),
+      );
+    }).toList();
+
+    lstPagador.value = dropdownItems;
+}
+
+  Future<void> prepararTela(Despesa ev) async {
+    descricaoController.text = ev.descricao;
+    editId = ev.idDespesa;
+    valorController.text = ev.valor;
+    observacaoController.text = ev.observacao!;
+    idPagador.value = ev.id_pagador.toString();
+    getCurrentDate(ev.data);
+  }
+
+
+  void doClear(){
     valorController.text = '';
     descricaoController.text = '';
     observacaoController.text = '';
@@ -51,59 +94,9 @@ class DespesaController extends GetxController {
     marcarTodos(true);
   }
 
-  Future<void> carregarDespesa() async {
-    final db = DbHelper.instance;
-
-    var json = await db.queryObj('despesa', editId!);
-
-    valorController.text = json['valor'].toString();
-    descricaoController.text = json['descricao'].toString();
-    observacaoController.text = json['observacao'].toString();
-    dateController.value.text = json['data'].toString();
-
-    updatePagador(json['id_participante'].toString());
-
-    var rateios = await db.queryRows('rateio', where: 'id_despesa = ?', whereArgs: [editId]);
-    Set<String> idsRateados = rateios.map((r) => r['id_participante'].toString()).toSet();
-
-    var participantes = await db.queryRows('participante', where: 'id_evento = ?', whereArgs: [eventoId]);
-
-    listaParticipantes.value = participantes.map((p) {
-      String idPart = p['id_participante'].toString();
-
-      return ItemEvento(
-        id: idPart,
-        nome: p['nome'] as String,
-        // Se o idPart estiver no nosso Set, retorna true, senão false
-        isChecked: idsRateados.contains(idPart),
-      );
-    }).toList();
-
-  }
-
-  Future<void> carregarEvento() async {
-    final db = DbHelper.instance;
-
-    // 1. Busca o nome do evento
-    var evento = await db.queryRows('evento', where: 'id_evento = ?', whereArgs: [eventoId]);
-    nomeEv.value = evento.first['nome'] as String;
-
-    if (editId == 0) {
-      var participantes = await db.queryRows(
-          'participante', where: 'id_evento = ?', whereArgs: [eventoId]);
-      listaParticipantes.value = participantes.map((p) {
-        return ItemEvento(
-          id: p['id_participante'].toString(), // Pega o ID original
-          nome: p['nome'] as String, // Pega o nome
-          isChecked: true,
-        );
-      }).toList();
-    }
-  }
-
   void toggleCheck(int index) {
     listaParticipantes[index].isChecked = !listaParticipantes[index].isChecked;
-    listaParticipantes.refresh(); // Notifica os ouvintes que a lista mudou
+    listaParticipantes.refresh();
   }
 
   void marcarTodos(bool valor) {
@@ -117,44 +110,31 @@ class DespesaController extends GetxController {
     this.idPagador.value = value;
   }
 
-
-  static Future<List<DropdownMenuItem<String>>> loadData(
-      String tabela, String filtro) async {
-    final db = DbHelper.instance;
+  List<DropdownMenuItem<String>> get dropdownItems {
     List<DropdownMenuItem<String>> list = [];
 
-    // Adiciona a opção padrão
+    // 1. Adiciona a opção padrão
     list.add(const DropdownMenuItem<String>(
       value: '0',
       child: Text('--Selecione--', style: TextStyle(fontSize: 12.0)),
     ));
 
-    final ret = await db.qryCombo(tabela, filtro);
+    // 2. Mapeia sua lista que já está em memória
+    final items = listaParticipantes.map((item) {
+      return DropdownMenuItem<String>(
+        value: item.id, // O ID do participante
+        child: Text(
+          item.nome,
+          style: const TextStyle(fontSize: 12.0),
+        ),
+      );
+    }).toList();
 
-    // Use .map().toList() para garantir a execução imediata e o retorno da lista
-    final items = ret.map((map) => getDropDownWidget(map)).toList();
-
-    // Adiciona tudo de uma vez à lista principal
     list.addAll(items);
-
     return list;
   }
 
-
-
-  static DropdownMenuItem<String> getDropDownWidget(Map<dynamic, dynamic> map) {
-    return DropdownMenuItem<String>(
-      child: Text(
-        map['nome'],
-        style: new TextStyle(
-          fontSize: 12.0,
-        ),
-      ),
-      value: map['id'].toString(),
-    );
-  }
-
-  getCurrentDate(String date) async {
+  Future<void> getCurrentDate(String date) async {
     //var dateParse = DateTime.parse(date);
     var formattedDate = date.split('-').reversed.join('/');
     //var formattedDate = "${dateParse.day}-${dateParse.month}-${dateParse.year}";
@@ -162,91 +142,52 @@ class DespesaController extends GetxController {
     this.dtDespesa.value = date;
   }
 
-  Future<void> salvarDespesa(BuildContext context) async {
-    final scaffold = ScaffoldMessenger.of(context);
 
+
+  Future<void> salvarDespesa() async {
     try {
-      final db = await dbHelper.database;
 
-      var dt = dateController.value.text;
-      if (dt == ''){
-        final scaffold = ScaffoldMessenger.of(context);
-        scaffold.showSnackBar(
-          SnackBar(
-            content: const Text('A data da despesa é obrigatória.'),
-            backgroundColor: Colors.red[900],
-          ),
+      Despesa obj = new Despesa(
+          idDespesa:  editId,
+          descricao: descricaoController.text,
+          observacao: observacaoController.text,
+          id_evento: eventoId!,
+          id_pagador: int.parse(idPagador.value),
+          valor: valorController.text,
+          data: dtDespesa.value,
+          rateio: []
+      );
+
+      List<ItemRateio> selecionados = listaParticipantes.where((item) => item.isChecked).toList();
+
+      for (var pag in selecionados) {
+        Rateio lst = new Rateio(
+          id_pagador: int.parse(pag.id),
+          nome: pag.nome,
+          valor: '0'
         );
-        return;
+        obj.rateio?.add(lst);
       }
-      var formattedDate = dt.split('/').reversed.join('-');
+
+      repository.save(obj);
+
+      Get.snackbar("Sucesso", 'Registro salvo com sucesso!');
 
 
-      await db?.transaction((txn) async {
-        var obj = {
-          'id_evento': eventoId,
-          'valor': valorController.text,
-          'descricao': descricaoController.text,
-          'observacao': observacaoController.text,
-          'id_participante': idPagador.value,
-          'data': formattedDate,
-        };
-
-        List<ItemEvento> selecionados = listaParticipantes.where((item) => item.isChecked).toList();
-
-        // A quantidade
-        int quantidade = selecionados.length;
-
-        var valor = double.parse(valorController.text) / quantidade;
-
-        if (editId == 0 || editId == null) {
-          int editId = await txn.insert(
-              'despesa', obj);
-          for (var pag in selecionados) {
-            await txn.insert(
-                'rateio', {'id_despesa': editId, 'id_participante': pag.id, 'valor': valor});
-          }
-        } else {
-          // Lógica de UPDATE (Delete + Insert)
-          await txn.update(
-              'despesa', obj, where: 'id_despesa = ?',
-              whereArgs: [editId]);
-          await txn.delete(
-              'rateio', where: 'id_despesa = ?', whereArgs: [editId]);
-          for (var pag in selecionados) {
-            await txn.insert(
-                'rateio', {'id_despesa': editId, 'id_participante': pag.id, 'valor': valor});
-          }
-        }
+      Future.delayed(snackBarDuration, () {
+        Get.back();
       });
-
-      // Se o código chegou aqui, a transação foi concluída com sucesso!
-      scaffold.showSnackBar(
-        SnackBar(
-          content: const Text('Registro salvo com sucesso!'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-        ),
-      );
-
-      // Opcional: fechar a tela após salvar
-      Navigator.pop(context);
     } catch (e) {
-      // Se ocorrer qualquer erro, o catch captura e mostra o erro
       print("Erro ao salvar: $e");
-      scaffold.showSnackBar(
-        SnackBar(
-          content: Text('Erro ao salvar registro: $e'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      Get.snackbar("Erro", 'Erro ao salvar: $e');
     }
   }
 }
 
-class ItemEvento {
+class ItemRateio {
   String id;
   String nome;
   bool isChecked;
 
-  ItemEvento({required this.id, required this.nome, this.isChecked = false});
+  ItemRateio({required this.id, required this.nome, this.isChecked = false});
 }

@@ -3,13 +3,40 @@ import 'dart:io';
 import 'package:bill_manager/models/evento.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../repositorys/EventoRepository.dart';
 import '../util/db_helper.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../util/storage.dart';
 
 
 
 class EventoController extends GetxController {
   int? editId;
+  Evento? eventoEmEdicao;
+
+  final EventoRepository repository;
+  EventoController(this.repository);
+
+  @override
+  void onInit() {
+    super.onInit();
+    preparar();
+  }
+
+  void preparar() {
+    eventoEmEdicao = Get.arguments as Evento?;
+
+    if (eventoEmEdicao == null) {
+      editId = 0;
+      doClear();
+    } else {
+      editId = eventoEmEdicao?.idEvento;
+      prepararTela(eventoEmEdicao!);
+    }
+  }
+
+
 
   var clearAll = false.obs;
 
@@ -20,10 +47,8 @@ class EventoController extends GetxController {
 
   final RxList<String> listaParticipantes = <String>[].obs;
 
-  var evento = new Evento().obs;
+  var evento = new Evento(nome: '').obs;
   final dbHelper = DbHelper.instance;
-
-
 
   RxString imagem = ''.obs;
 
@@ -37,89 +62,41 @@ class EventoController extends GetxController {
     if (pickedFile != null) {
       File imageFile = File(pickedFile.path);
       imagem.value = pickedFile.path;
-      // Use a imagem aqui (ex: exibir no app ou enviar para servidor)
     }
   }
 
-  Future<void> prepararTela(int id) async {
-    editId = id;
-    if (id > 0) {
-      await carregarEvento(id);
-    } else {
-      doClear();
-    }
-  }
-
-  initObj(int id) async {
-    editId = id;
-    final db = DbHelper.instance;
-
-    var json = await db.queryObj('evento', id);
-
-    nomeController.text = json['nome'].toString();
+  Future<void> prepararTela(Evento ev) async {
+      nomeController.text = ev.nome;
+      editId = ev.idEvento;
+      listaParticipantes.value = ev.participantes!;
+      imagem.value = ev.foto!;
   }
 
 
-
-  Future<void> carregarEvento(int id) async {
-   // editId = id;
-   // final db = await dbHelper.database;
-    final db = DbHelper.instance;
-
-    // 1. Busca o nome do evento
-    var evento = await db.queryRows('evento', where: 'id_evento = ?', whereArgs: [id]);
-    nomeController.text = evento.first['nome'] as String;
-    imagem.value = evento.first['foto'] as String;
-
-    // 2. Busca os participantes vinculados
-    var participantes = await db.queryRows('participante', where: 'id_evento = ?', whereArgs: [id]);
-    listaParticipantes.value = participantes.map((p) => p['nome'] as String).toList();
-  }
-
-  Future<void> salvarEventoCompleto(BuildContext context) async {
-   final scaffold = ScaffoldMessenger.of(context);
+  Future<void> salvarEventoCompleto() async {
 
    try {
-     final db = await dbHelper.database;
-
-     await db?.transaction((txn) async {
-       if (editId == 0) {
-         // Lógica de INSERT
-         int editId = await txn.insert('evento', {'nome': nomeController.text, 'foto': imagem.value});
-         for (var nome in listaParticipantes) {
-           await txn.insert('participante', {'nome': nome, 'id_evento': editId});
-         }
-       } else {
-         // Lógica de UPDATE (Delete + Insert)
-         await txn.update('evento', {'nome': nomeController.text, 'foto': imagem.value}, where: 'id_evento = ?', whereArgs: [editId]);
-         await txn.delete('participante', where: 'id_evento = ?', whereArgs: [editId]);
-         for (var nome in listaParticipantes) {
-           await txn.insert('participante', {'nome': nome, 'id_evento': editId});
-         }
-       }
-     });
-
-     // Se o código chegou aqui, a transação foi concluída com sucesso!
-     scaffold.showSnackBar(
-       SnackBar(
-         content: const Text('Registro salvo com sucesso!'),
-         backgroundColor: Theme.of(context).colorScheme.primary,
-         duration: snackBarDuration,
-       ),
+     Evento obj = new Evento(
+         idEvento:  editId,
+         nome: nomeController.text,
+         foto: imagem.value,
+         participantes: listaParticipantes
      );
+
+
+     repository.save(obj);
+
+     Get.snackbar("Sucesso", 'Registro salvo com sucesso!');
+
+     await Storage.insere('id_evento_ativo', obj.idEvento);
+     await Storage.insere('nome_evento_ativo', obj.nome);
 
      Future.delayed(snackBarDuration, () {
        Get.back();
      });
    } catch (e) {
-     // Se ocorrer qualquer erro, o catch captura e mostra o erro
      print("Erro ao salvar: $e");
-     scaffold.showSnackBar(
-       SnackBar(
-         content: Text('Erro ao salvar registro: $e'),
-         backgroundColor: Theme.of(context).colorScheme.error,
-       ),
-     );
+     Get.snackbar("Erro", 'Erro ao salvar: $e');
    }
 
   }

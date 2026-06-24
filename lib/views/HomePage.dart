@@ -3,6 +3,7 @@ import 'package:bill_manager/views/ResumoView.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/navigation_controller.dart';
+import 'CadastroView.dart';
 import 'HomeView.dart';
 
 class HomePage extends StatelessWidget {
@@ -10,7 +11,8 @@ class HomePage extends StatelessWidget {
 
   final List<Widget> _pages = [
     HomeView(),
-    ResumoView()
+    ResumoView(),
+    CadastroView()
   ];
 
   @override
@@ -44,6 +46,7 @@ class HomePage extends StatelessWidget {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
           BottomNavigationBarItem(icon: Icon(Icons.travel_explore), label: 'Resumo'),
+          BottomNavigationBarItem(icon: Icon(Icons.travel_explore), label: 'Cadastro'),
         ],
       )),
     );

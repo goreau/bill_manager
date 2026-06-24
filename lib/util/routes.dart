@@ -1,9 +1,15 @@
+import 'package:bill_manager/controllers/bindings/evento_bindings.dart';
 import 'package:bill_manager/views/DetalheResumo.dart';
 import 'package:bill_manager/views/SearchView.dart';
 
+import '../controllers/bindings/login_bindings.dart';
 import '../controllers/camera_controller.dart';
 import '../controllers/despesa_controller.dart';
 import '../controllers/evento_controller.dart';
+import '../controllers/login_controller.dart';
+import '../views/CadastroView.dart';
+import '../views/LoginView.dart';
+import '../views/RegisterView.dart';
 import '../views/ResumoView.dart';
 import '../views/EventoView.dart';
 import 'package:get/get.dart';
@@ -24,13 +30,23 @@ class AppPages {
         Get.lazyPut<MyCameraController>(() => MyCameraController());
       }),
       children: [
-        GetPage(name: '/home', page: () => HomeView()),
+        GetPage(
+          name: '/login',
+          page: () => LoginView(),
+        ),
+        GetPage(
+          name: '/register',
+          page: () => RegisterView(),
+        ),
+        GetPage(name: '/home', page: () => HomeView(), binding: EventoBinding() ),
         GetPage(name: '/despesa', page: () => DespesaNewView()),
         GetPage(name: '/evento', page: () => EventoView()),
         GetPage(name: '/search', page: () => SearchView()),
         GetPage(name: '/resumo', page: () => ResumoView()),
-        GetPage(name: '/detalhe', page: () => DetalheResumoView())
+        GetPage(name: '/detalhe', page: () => DetalheResumoView()),
+        GetPage(name: '/cadastro', page: () => CadastroView()),
       ],
     ),
   ];
 }
+

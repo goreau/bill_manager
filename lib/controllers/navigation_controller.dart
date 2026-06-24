@@ -16,7 +16,7 @@ class NavigationController extends GetxController {
   @override
   void onInit(){
     super.onInit();
-    Get.put(DespesaController());
+ //   Get.put(DespesaController());
   }
 
   List<Widget> get appBarActions {

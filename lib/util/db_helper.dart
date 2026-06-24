@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/auxiliares.dart';
+import '../models/evento.dart';
 
 class DbHelper {
   static final _databaseName = "bill.db";
@@ -146,13 +147,13 @@ class DbHelper {
     }
   }
 
-  Future<List<EventoModel>> consultaEventoMaster() async {
+  Future<List<Evento>> consultaEventoMaster() async {
     Database? db = await instance.database;
 
     // 1. Busca todos os eventos
     List<Map<String, dynamic>> eventosMap = await db!.query('evento');
 
-    List<EventoModel> listaFinal = [];
+    List<Evento> listaFinal = [];
 
     for (var evento in eventosMap) {
       int idEvento = evento['id_evento'];
@@ -170,13 +171,13 @@ class DbHelper {
       ).toList();
 
 
-      listaFinal.add(EventoModel.fromMap(evento, nomesParticipantes));
+      listaFinal.add(Evento.fromJson(evento));
     }
 print(listaFinal.toString());
     return listaFinal;
   }
 
-  Future<List<DespesaModel>> consultaDespesaMaster(int id) async {
+/*  Future<List<DespesaModel>> consultaDespesaMaster(int id) async {
     Database? db = await instance.database;
 
     // 1. Busca todas as despesas do evento
@@ -202,14 +203,14 @@ print(listaFinal.toString());
 
 
       // 3. Converte a lista de mapas para List<RateioModel>
-      List<RateioModel> rateio = rateioMap.map((p) => RateioModel.fromMap(p)).toList();
+    //  List<RateioModel> rateio = rateioMap.map((p) => RateioModel.fromMap(p)).toList();
 
       // 4. Cria o objeto DespesaModel passando a lista de rateios
-      listaFinal.add(DespesaModel.fromMap(desp, rateio));
+  //    listaFinal.add(DespesaModel.fromMap(desp, rateio));
     }
 
     return listaFinal;
-  }
+  }*/
 
   _recupera(Database db) async {
     for (var element in tabelas) {
