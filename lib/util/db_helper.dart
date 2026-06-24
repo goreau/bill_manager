@@ -154,25 +154,7 @@ class DbHelper {
 
     List<Evento> listaFinal = [];
 
-    for (var evento in eventosMap) {
-      int idEvento = evento['id_evento'];
 
-      // 2. Busca os participantes deste evento específico
-      List<Map<String, dynamic>> participantesMap = await db.query(
-          'participante',
-          where: 'id_evento = ?',
-          whereArgs: [idEvento]
-      );
-
-      // 3. Converte a lista de participantes para List<String>
-    /*  List<String> nomesParticipantes = participantesMap.map((p) =>
-      p['nome'] as String
-      ).toList();*/
-
-
-      listaFinal.add(Evento.fromJson(evento));
-    }
-print(listaFinal.toString());
     return listaFinal;
   }
 

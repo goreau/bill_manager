@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:bill_manager/models/evento.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
